@@ -1,6 +1,27 @@
 import React , {useState} from 'react';
+import {ACTIONS} from '../ToDo/ToDo'
+
+const timeZone = [13,14,15,16,17,18,19,20,21,22,23]
 
 
+const PMorAM = (time)=>{
+  const [hour,min] = time.split(":")
+  let newTime = ''
+
+  if(parseInt(hour) >11 && parseInt(hour)<24){
+    newTime+=`${timeZone.includes(hour.toString)?timeZone.indexOf(hour)+1:'12'}:${min} PM`
+  }
+  else{
+    newTime+=`${hour}:${min} AM`
+  }
+
+  return newTime
+}
+
+const transformDate = (date)=>{
+  const [year,month,day] = date.split('-')
+  return `${parseInt(month)}/${parseInt(day)}/${year}`
+}
 
 export default function ToDoForm(props){
 
@@ -13,44 +34,51 @@ export default function ToDoForm(props){
 
 
     const onTaskName = (e)=>{
-        e.preventDefault()
         setTaskName(e.target.value)
     }
 
     const onLocation = (e) =>{
-        e.preventDefault()
+        
         setLocation(e.target.value)
     
     }
 
     const onDate = (e)=>{
-        e.preventDefault()
+        
         setDate(e.target.value)
     }
 
     const onTime = (e)=>{
-        e.preventDefault()
+        
         setTime(e.target.value)
+        
     }
 
     const onDescription = (e)=>{
-        e.preventDefault()
+        
         setDescription(e.target.value)
     }
 
+
+
     const onToDoSubmit = (e)=>{
+
+        console.log(PMorAM(time))
+
         e.preventDefault()
-        props.onToDoSubmitForm({
-            taskName,
-            location,
-            time,
-            date,
-            description
-        })
+        const task_={
+          taskName,
+          location,
+          time:PMorAM(time),
+          date:transformDate(date),
+          description
+      }
+        props.dispatch({type:ACTIONS.ADD_TASK,payload:{task:task_}})
+
     }
 
     return(
-        <form className="ui form">
+        <form onSubmit={onToDoSubmit} className="ui form">
         <div className="field">
           <label>Task Name</label>
           <input type="text" value={taskName} onChange={onTaskName} placeholder="To do Task"/>
@@ -71,7 +99,11 @@ export default function ToDoForm(props){
         <label>Description</label>
         <textarea value={description} onChange={onDescription} rows="2"></textarea>
       </div>
-        <button onSubmit={onToDoSubmit} className="ui button" type="submit">ToDo</button>
+        <button  className="ui negative button" type="submit"><i className="plus icon"></i>ToDo</button>
+        <button onClick={(e)=>{
+                e.preventDefault()
+                props.dispatch({type:ACTIONS.CLOSE_FORM})
+            }}  className="ui negative button" type="button"><i className="times icon"></i>Close</button>
       </form>
     );
 }
