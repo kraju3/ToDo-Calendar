@@ -8,12 +8,15 @@ const PMorAM = (time)=>{
   const [hour,min] = time.split(":")
   let newTime = ''
 
-  if(parseInt(hour) >11 && parseInt(hour)<24){
-    newTime+=`${timeZone.includes(hour.toString)?timeZone.indexOf(hour)+1:'12'}:${min} PM`
+  console.log(hour)
+
+  if(parseInt(hour) > 11 && parseInt(hour)<24){
+    newTime+=`${timeZone.find(t=>t===parseInt(hour)) ? timeZone.indexOf(parseInt(hour))+1 : '12'}:${min} PM`
   }
   else{
     newTime+=`${hour}:${min} AM`
   }
+
 
   return newTime
 }

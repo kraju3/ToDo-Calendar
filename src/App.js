@@ -16,14 +16,14 @@ const Tasks = [
   {"taskName":"BWA","location":"Frýdlant","time":"7:11 AM","description":"knowledge base","date":"4/30/2020"},
   {"taskName":"iLife","location":"Gangkou","time":"3:18 PM","description":"fault-tolerant","date":"10/28/2019"},
   {"taskName":"UTRAN","location":"Bell Ville","time":"5:37 PM","description":"product","date":"3/3/2020"},
-  {"taskName":"IT Project &amp; Program Management","location":"Puerto San José","time":"1:11 PM","description":"data-warehouse","date":"11/3/2019"}
+  {"taskName":"IT Project &amp; Program Management","location":"Puerto San José","time":"1:11 PM","description":"data-warehouse","date":"11/3/2019"},
+  {"taskName":"React","location":"Puerto San José","time":"1:11 PM","description":"data-warehouse","date":"10/9/2020"}
 ]
 
 
 function reducer (state,action) {
   switch(action.type){
     case 'sync':
-      console.log(action.payload.tasks)
       return {
         tasks:action.payload.tasks
       }
@@ -38,9 +38,7 @@ export default function App(props) {
   
   const [state,dispatch] = useReducer(reducer,{tasks:Tasks})
 
-  useEffect(()=>{
-    console.log(state.tasks)
-  },[state.tasks])
+
 
   return (
         <React.Fragment>
