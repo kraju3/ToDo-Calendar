@@ -1,5 +1,6 @@
-import React, {useReducer} from 'react';
+import React, {useReducer,useRef} from 'react';
 
+import {ACTIONS} from '../ToDo/ToDo'
 import Calendar from '@toast-ui/react-calendar';
 import '../../../node_modules/tui-calendar/dist/tui-calendar.css';
 
@@ -7,7 +8,7 @@ import '../../../node_modules/tui-calendar/dist/tui-calendar.css';
 import '../../../node_modules/tui-date-picker/dist/tui-date-picker.css';
 import '../../../node_modules/tui-time-picker/dist/tui-time-picker.css';
 
-var MONTHLY_CUSTOM_THEME = {
+const MONTHLY_CUSTOM_THEME = {
     // month header 'dayname'
     'month.dayname.height': '42px',
     'month.dayname.borderLeft': 'none',
@@ -44,55 +45,119 @@ var MONTHLY_CUSTOM_THEME = {
     'month.moreViewList.padding': '10px'
   };
 
-const templates = {
-  popupDetailLocation: function(schedule) {
-    return 'Location : ' + schedule.location;
-  },
-  popupDetailTaskName: function(schedule) {
-    return 'Task Name : ' + schedule.title;
-  },
-  popupDetailBody: function(schedule) {
-    console.log(schedule)
-    return 'Body : ' + schedule.description;
-  },
-  popupDetailTime: function(schedule) {
-    
-    return 'Time: ' +schedule.start.toString()
-  },
-  time(schedule) {
-    return `<span style="color:#fff;background-color: red;">${
-      schedule.title
-    }</span>`;
-  },
-}
 
-function reducer(tasks,action){
+function reducer(state,action){
 
+    switch(action.type){
+      case ACTIONS.REMOVE_TASK:
+        return {
+          tasks:state.tasks.filter(task=>task.id!==action.payload.schedule.id),
+          month:state.month
+        }
+      case 'change-month':
+        return {
+          tasks:state.tasks,
+          month:action.payload.month
+        }
+      default:
+        return state
+    }
 
 }
 
 export default function TaskCalendar (props) {
     
-    const [state,dispatch] = useReducer(reducer,{tasks:props.tasks.map((task,index)=>{
-        let newObject = {...task,id:index.toString(),calendarId:'0',title:task.taskName,category:'time',dueDateClass:'',start:new Date(task.date+` ${task.time}`),isReadOnly:true}
+    const [state,dispatch] = useReducer(reducer,{
+      tasks:props.tasks.map((task,index)=>{
+        let newObject = {
+          ...task,
+          id:index.toString(),
+          calendarId:'0',
+          title:task.taskName,
+          category:'time',
+          dueDateClass:'',
+          bgColor:(task.description==='Work')?'red':'orange',
+          start:new Date(task.date+` ${task.time}`),
+          isReadOnly:false
+        }
         return newObject
-    })})
+    }),
+      month:new Date().toLocaleString('default', { month: 'long' })
+    })
 
-  
+    const calendarRef = useRef()
+
+    const handleClickNextButton = (e) => {
+      e.preventDefault()
+      const calendarInstance = calendarRef.current.getInstance();
+
+      calendarInstance.next();
+      dispatch({type:'change-month' ,payload:{month:calendarInstance.getDate().toDate().toLocaleString('default', { month: 'long' })}})
+    };
+
+    const handleClickPrevButton = (e) => {
+      e.preventDefault()
+      const calendarInstance = calendarRef.current.getInstance();
+
+      calendarInstance.prev();
+      dispatch({type:'change-month' ,payload:{month:calendarInstance.getDate().toDate().toLocaleString('default', { month: 'long' })}})
+    };
+
+    const templates = {
+      popupDetailLocation: function(schedule) {
+        return 'Location : ' + schedule.location;
+      },
+      popupDetailTaskName: function(schedule) {
+        return 'Task Name : ' + schedule.title;
+      },
+      popupDetailBody: function(schedule) {
+        console.log(schedule)
+        return 'Body : ' + schedule.description;
+      },
+      popupDetailTime: function(schedule) {
+        
+        return 'Time: ' +schedule.start.toString()
+      },
+      popupEdit: function() {
+        return 'Edit';
+      },
+      popupDelete: function(schedule) {
+        dispatch({type:ACTIONS.REMOVE_TASK,payload:{schedule}})
+        props.dispatch({type:'sync' , payload: {tasks:state.tasks.map(task=>{
+          const {id,taskName,date,time,location,description} = task
+
+          return {id,taskName,date,time,location,description}
+        })}})
+        console.log('deleted')
+        return 'Delete';
+      },
+      time(schedule) {
+        return `<a class="ui ${schedule.bgColor} ribbon label"><i class="tag icon"></i>${schedule.title }</a>` 
+      }
+    }
     
 
     return(
             <React.Fragment>
+                <div>
+                  <span><button onClick={handleClickPrevButton} className="ui left labeled icon button"><i className="left arrow icon"></i>Prev</button></span>
+                  <span><button onClick={handleClickNextButton} className="ui right labeled icon button"><i className="right arrow icon"></i>Next</button></span>
+                  <h5 className="ui bloack center aligned icon header">
+                    <i className="calendar alternate icon"></i>
+                        {state.month}
+                  </h5>
+                </div>
                 <Calendar
+                    ref={calendarRef}
                     view={"month"} theme={MONTHLY_CUSTOM_THEME}
                     schedules={state.tasks}
-                      scheduleView
-                      taskView
-                      template={templates}
-                      useDetailPopup={true}
-                      disableDblClick={true}
-                      disableClick={false}
-                      isReadOnly={true}
+                    scheduleView
+                    taskView
+                    template={templates}
+                    useDetailPopup={true}
+                    disableDblClick={true}
+                    disableClick={true}
+                    isReadOnly={false}
                 ></Calendar>
             </React.Fragment>
     )

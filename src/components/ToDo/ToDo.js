@@ -69,9 +69,12 @@ export default function ToDo(props){
         toAdd:false 
     })
 
+    const AppDispatcher = props.dispatch
+
+
     useEffect(()=>{
-        props.dispatch({type:'sync',payload:{tasks:state.tasks}})
-    },[state.tasks])
+        AppDispatcher({type:'sync',payload:{tasks:state.tasks}})
+    },[state.tasks,AppDispatcher])
 
     return (
         <React.Fragment>

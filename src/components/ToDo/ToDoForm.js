@@ -8,7 +8,6 @@ const PMorAM = (time)=>{
   const [hour,min] = time.split(":")
   let newTime = ''
 
-  console.log(hour)
 
   if(parseInt(hour) > 11 && parseInt(hour)<24){
     newTime+=`${timeZone.find(t=>t===parseInt(hour)) ? timeZone.indexOf(parseInt(hour))+1 : '12'}:${min} PM`
@@ -59,14 +58,13 @@ export default function ToDoForm(props){
 
     const onDescription = (e)=>{
         
+        console.log(e.target.value)
         setDescription(e.target.value)
     }
 
 
 
     const onToDoSubmit = (e)=>{
-
-        console.log(PMorAM(time))
 
         e.preventDefault()
         const task_={
@@ -100,7 +98,11 @@ export default function ToDoForm(props){
         </div>
       <div className="field">
         <label>Description</label>
-        <textarea value={description} onChange={onDescription} rows="2"></textarea>
+        <select onChange={onDescription} className="ui dropdown">
+            <option value="">Description</option>
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+      </select>
       </div>
         <button  className="ui negative button" type="submit"><i className="plus icon"></i>ToDo</button>
         <button onClick={(e)=>{
