@@ -101,6 +101,7 @@ function sortTasks(tasks) {
 function reducer(tasks, action) {
   switch (action.type) {
     case ACTIONS.ADD_TASK:
+      console.log(action.payload.task)
       return {
         pending: sortTasks([
           ...tasks.pending,

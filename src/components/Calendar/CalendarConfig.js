@@ -67,7 +67,6 @@ export const templates = {
     return "Task Name : " + schedule.title;
   },
   popupDetailBody: function (schedule) {
-    console.log(schedule);
     return "Body : " + schedule.body;
   },
   popupDetailTime: function (schedule) {
@@ -80,7 +79,6 @@ export const templates = {
     return "Delete";
   },
   time(schedule) {
-    console.log(schedule.bgColor);
     return `<a class="ui ${schedule.bgColor} ribbon label"><i class="tag icon"></i>${schedule.title}</a>`;
   },
 };

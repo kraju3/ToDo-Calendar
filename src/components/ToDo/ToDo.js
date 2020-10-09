@@ -51,7 +51,7 @@ export default function ToDo(props) {
 
   return (
     <React.Fragment>
-      <div>
+      <div className="marginB">
         <h2 className="ui block center aligned icon header">
           <i className="circular tasks icon"></i>
           Tasks
@@ -93,35 +93,55 @@ export default function ToDo(props) {
           <div className="label">Completed Today</div>
         </div>
       </div>
+      <br></br>
       <div id="ui left small rail">
-        <div className="ui segment">
-          <h3 className="ui center aligned yellow header">Pending</h3>
-          <div className="ui divided items">
-            {sortByToday(pending).map((task, index) => {
-              return (
-                <Task
-                  key={task.taskName + index}
-                  task={task}
-                  dispatch={Task_Dispatch}
-                />
-              );
-            })}
+        <div className="ui fade reveal">
+          <div className="visible content">
+            <div className="ui yellow ribbon huge label">
+              <i className="tasks icon"></i> Pending
+            </div>
+          </div>
+          <div className="hidden content">
+            <div className="ui segment">
+              <br></br>
+              <div className="ui divided items">
+                {sortByToday(pending).map((task, index) => {
+                  return (
+                    <Task
+                      key={task.taskName + index}
+                      task={task}
+                      dispatch={Task_Dispatch}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
       <div id="ui right small rail">
-        <div className="ui segment">
-          <h3 className="ui center aligned green header">Completed</h3>
-          <div className="ui divided items">
-            {finished.map((task, index) => {
-              return (
-                <Task
-                  key={task.taskName + index}
-                  task={task}
-                  dispatch={Task_Dispatch}
-                />
-              );
-            })}
+        <div className="ui fade reveal">
+          <div className="visible content">
+            <div className="ui center aligned green ribbon huge label">
+              <i className="tasks icon"></i> Completed
+            </div>
+          </div>
+          <div className="hidden content">
+            <div className="ui segment">
+              <br></br>
+              <div className="ui divided items">
+                {finished.map((task, index) => {
+                  return (
+                    <Task
+                      key={task.taskName + index}
+                      task={task}
+                      dispatch={Task_Dispatch}
+                    />
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </div>
       </div>

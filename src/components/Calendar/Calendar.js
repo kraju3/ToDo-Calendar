@@ -1,5 +1,5 @@
 import Calendar from "@toast-ui/react-calendar";
-import React, { useContext, useReducer, useRef } from "react";
+import React, { useContext, useReducer, useRef, useEffect } from "react";
 import "../../../node_modules/tui-calendar/dist/tui-calendar.css";
 // If you use the default popups, use this.
 import "../../../node_modules/tui-date-picker/dist/tui-date-picker.css";
@@ -15,28 +15,37 @@ function reducer(state, action) {
         tasks: state.tasks,
         month: action.payload.month,
       };
+    case "sync-pending":
+      return {
+        tasks: mapTaskToSchedule(action.payload.tasks),
+        month: state.month,
+      };
     default:
       return state;
   }
 }
 
+function mapTaskToSchedule(tasks) {
+  return tasks.map((task, index) => {
+    let newObject = {
+      ...task,
+      id: task.taskID,
+      calendarId: "0",
+      title: task.taskName,
+      category: "time",
+      dueDateClass: "",
+      bgColor: task.description === "Work" ? "red" : "orange",
+      start: new Date(task.date + ` ${task.time}`),
+      isReadOnly: false,
+    };
+    return newObject;
+  });
+}
+
 export default function TaskCalendar(props) {
   const [{ pending }, Task_Dispatch] = useContext(TasksContext);
   const [state, dispatch] = useReducer(reducer, {
-    tasks: pending.map((task, index) => {
-      let newObject = {
-        ...task,
-        id: task.taskID,
-        calendarId: "0",
-        title: task.taskName,
-        category: "time",
-        dueDateClass: "",
-        bgColor: task.description === "Work" ? "red" : "orange",
-        start: new Date(task.date + ` ${task.time}`),
-        isReadOnly: false,
-      };
-      return newObject;
-    }),
+    tasks: mapTaskToSchedule(pending),
     month: new Date().toLocaleString("default", { month: "long" }),
   });
 
@@ -119,7 +128,6 @@ export default function TaskCalendar(props) {
       location: updatedSchedule.location,
     };
 
-    console.log(newTask);
 
     Task_Dispatch({
       type: ACTIONS.UPDATE,
@@ -138,8 +146,6 @@ export default function TaskCalendar(props) {
   const handleBeforeCreateSchedule = (e) => {
     const { location, start, title } = e;
 
-    console.log(e);
-
     let [hour, min, PMorAM] = start.toDate().toLocaleTimeString().split(":");
     let [, pm_am] = PMorAM.split(" ");
 
@@ -154,8 +160,6 @@ export default function TaskCalendar(props) {
       description: e.state,
     };
 
-    
-
     Task_Dispatch({
       type: ACTIONS.ADD_TASK,
       payload: {
@@ -168,17 +172,12 @@ export default function TaskCalendar(props) {
         },
       },
     });
-
-    const calendarInstance = calendarRef.current.getInstance()
-
-
-    calendarInstance.createSchedules([newSchedule])
-
-    calendarInstance.render(true)
-
-  
-
   };
+
+  useEffect(() => {
+    dispatch({ type: "sync-pending", payload: { tasks: pending } });
+    console.log("On tasks")
+  }, [pending]);
 
   return (
     <React.Fragment>
