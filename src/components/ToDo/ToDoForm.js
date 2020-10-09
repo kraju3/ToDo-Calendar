@@ -1,114 +1,116 @@
-import React , {useState} from 'react';
-import {ACTIONS} from '../ToDo/ToDo'
+import React, { useContext, useState } from "react";
+import { TasksContext } from "../../context/TaskContextProvider";
+import { ACTIONS } from "../ToDo/ToDo";
 
-const timeZone = [13,14,15,16,17,18,19,20,21,22,23]
+const PMorAM = (time) => {
+  const [hour, min] = time.split(":");
 
+  return parseInt(hour) > 11 && parseInt(hour) < 24
+    ? `${parseInt(hour) > 12 ? `${parseInt(hour) - 12}` : "12"}:${min} PM`
+    : `${hour}:${min} AM`;
+};
 
-const PMorAM = (time)=>{
-  const [hour,min] = time.split(":")
-  let newTime = ''
+const transformDate = ([year, month, day]) => {
+  return `${parseInt(month)}/${parseInt(day)}/${year}`;
+};
 
+export default function ToDoForm(props) {
+  const [taskName, setTaskName] = useState("");
+  const [location, setLocation] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [description, setDescription] = useState("");
 
-  if(parseInt(hour) > 11 && parseInt(hour)<24){
-    newTime+=`${timeZone.find(t=>t===parseInt(hour)) ? timeZone.indexOf(parseInt(hour))+1 : '12'}:${min} PM`
-  }
-  else{
-    newTime+=`${hour}:${min} AM`
-  }
+  const [tasks, Task_Dispatch] = useContext(TasksContext);
 
+  const onTaskName = (e) => {
+    setTaskName(e.target.value);
+  };
 
-  return newTime
-}
+  const onLocation = (e) => {
+    setLocation(e.target.value);
+  };
 
-const transformDate = (date)=>{
-  const [year,month,day] = date.split('-')
-  return `${parseInt(month)}/${parseInt(day)}/${year}`
-}
+  const onDate = (e) => {
+    setDate(e.target.value);
+  };
 
-export default function ToDoForm(props){
+  const onTime = (e) => {
+    setTime(e.target.value);
+  };
 
+  const onDescription = (e) => {
+    console.log(e.target.value);
+    setDescription(e.target.value);
+  };
 
-    const [taskName,setTaskName] = useState('')
-    const [location,setLocation] = useState('')
-    const [date,setDate] = useState('');
-    const [time,setTime] = useState('');
-    const [description,setDescription] = useState('')
+  const onToDoSubmit = (e) => {
+    e.preventDefault();
+    const task_ = {
+      taskName,
+      location,
+      time: PMorAM(time),
+      date: transformDate(date.split("-")),
+      description,
+    };
+    Task_Dispatch({ type: ACTIONS.ADD_TASK, payload: { task: task_ } });
+    props.dispatch({ type: ACTIONS.CLOSE_FORM });
+  };
 
-
-    const onTaskName = (e)=>{
-        setTaskName(e.target.value)
-    }
-
-    const onLocation = (e) =>{
-        
-        setLocation(e.target.value)
-    
-    }
-
-    const onDate = (e)=>{
-        
-        setDate(e.target.value)
-    }
-
-    const onTime = (e)=>{
-        
-        setTime(e.target.value)
-        
-    }
-
-    const onDescription = (e)=>{
-        
-        console.log(e.target.value)
-        setDescription(e.target.value)
-    }
-
-
-
-    const onToDoSubmit = (e)=>{
-
-        e.preventDefault()
-        const task_={
-          taskName,
-          location,
-          time:PMorAM(time),
-          date:transformDate(date),
-          description
-      }
-        props.dispatch({type:ACTIONS.ADD_TASK,payload:{task:task_}})
-
-    }
-
-    return(
-        <form onSubmit={onToDoSubmit} className="ui form">
-        <div className="field">
-          <label>Task Name</label>
-          <input type="text" value={taskName} onChange={onTaskName} placeholder="To do Task"/>
-        </div>
-        <div className="field">
-          <label>Location</label>
-          <input type="text" value={location} onChange={onLocation} placeholder="Location"/>
-        </div>
-        <div className="field">
-          <label>Date</label>
-          <input type="date" value={date} onChange={onDate} placeholder="Date"/>
-        </div>
-        <div className="field">
-          <label>Time</label>
-          <input type="time" value={time} onChange={onTime} placeholder="Time(H:MM:00 PM/AM)"/>
-        </div>
+  return (
+    <form onSubmit={onToDoSubmit} className="ui form">
+      <div className="field">
+        <label>Task Name</label>
+        <input
+          type="text"
+          value={taskName}
+          onChange={onTaskName}
+          placeholder="To do Task"
+        />
+      </div>
+      <div className="field">
+        <label>Location</label>
+        <input
+          type="text"
+          value={location}
+          onChange={onLocation}
+          placeholder="Location"
+        />
+      </div>
+      <div className="field">
+        <label>Date</label>
+        <input type="date" value={date} onChange={onDate} placeholder="Date" />
+      </div>
+      <div className="field">
+        <label>Time</label>
+        <input
+          type="time"
+          value={time}
+          onChange={onTime}
+          placeholder="Time(H:MM:00 PM/AM)"
+        />
+      </div>
       <div className="field">
         <label>Description</label>
         <select onChange={onDescription} className="ui dropdown">
-            <option value="">Description</option>
-            <option value="Work">Work</option>
-            <option value="Personal">Personal</option>
-      </select>
+          <option value="">Description</option>
+          <option value="Work">Work</option>
+          <option value="Personal">Personal</option>
+        </select>
       </div>
-        <button  className="ui negative button" type="submit"><i className="plus icon"></i>ToDo</button>
-        <button onClick={(e)=>{
-                e.preventDefault()
-                props.dispatch({type:ACTIONS.CLOSE_FORM})
-            }}  className="ui negative button" type="button"><i className="times icon"></i>Close</button>
-      </form>
-    );
+      <button className="ui negative button" type="submit">
+        <i className="plus icon"></i>ToDo
+      </button>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          props.dispatch({ type: ACTIONS.CLOSE_FORM });
+        }}
+        className="ui negative button"
+        type="button"
+      >
+        <i className="times icon"></i>Close
+      </button>
+    </form>
+  );
 }
