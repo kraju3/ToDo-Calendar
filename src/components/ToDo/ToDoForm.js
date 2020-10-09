@@ -21,7 +21,7 @@ export default function ToDoForm(props) {
   const [time, setTime] = useState("");
   const [description, setDescription] = useState("");
 
-  const [tasks, Task_Dispatch] = useContext(TasksContext);
+  const [, Task_Dispatch] = useContext(TasksContext);
 
   const onTaskName = (e) => {
     setTaskName(e.target.value);
@@ -51,7 +51,7 @@ export default function ToDoForm(props) {
       location,
       time: PMorAM(time),
       date: transformDate(date.split("-")),
-      description,
+      description: description === "0" ? "Personal" : "Work",
     };
     Task_Dispatch({ type: ACTIONS.ADD_TASK, payload: { task: task_ } });
     props.dispatch({ type: ACTIONS.CLOSE_FORM });
@@ -92,10 +92,13 @@ export default function ToDoForm(props) {
       </div>
       <div className="field">
         <label>Description</label>
-        <select onChange={onDescription} className="ui dropdown">
-          <option value="">Description</option>
-          <option value="Work">Work</option>
-          <option value="Personal">Personal</option>
+        <select
+          onChange={onDescription}
+          className="ui dropdown"
+          placeholder="Description"
+        >
+          <option value="1">Work</option>
+          <option value="0">Personal</option>
         </select>
       </div>
       <button className="ui negative button" type="submit">

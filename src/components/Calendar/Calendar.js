@@ -1,50 +1,12 @@
-import React, { useReducer, useRef, useContext } from "react";
-
-import { TasksContext } from "../../context/TaskContextProvider";
 import Calendar from "@toast-ui/react-calendar";
+import React, { useContext, useReducer, useRef } from "react";
 import "../../../node_modules/tui-calendar/dist/tui-calendar.css";
-
 // If you use the default popups, use this.
 import "../../../node_modules/tui-date-picker/dist/tui-date-picker.css";
 import "../../../node_modules/tui-time-picker/dist/tui-time-picker.css";
+import { TasksContext } from "../../context/TaskContextProvider";
 import { ACTIONS } from "../ToDo/ToDo";
-
-const MONTHLY_CUSTOM_THEME = {
-  // month header 'dayname'
-  "month.dayname.height": "42px",
-  "month.dayname.borderLeft": "none",
-  "month.dayname.paddingLeft": "8px",
-  "month.dayname.paddingRight": "0",
-  "month.dayname.fontSize": "13px",
-  "month.dayname.backgroundColor": "inherit",
-  "month.dayname.fontWeight": "normal",
-  "month.dayname.textAlign": "left",
-
-  // month day grid cell 'day'
-  "month.holidayExceptThisMonth.color": "#f3acac",
-  "month.dayExceptThisMonth.color": "#bbb",
-  "month.weekend.backgroundColor": "#fafafa",
-  "month.day.fontSize": "16px",
-
-  // month schedule style
-  "month.schedule.borderRadius": "5px",
-  "month.schedule.height": "18px",
-  "month.schedule.marginTop": "2px",
-  "month.schedule.marginLeft": "10px",
-  "month.schedule.marginRight": "10px",
-
-  // month more view
-  "month.moreView.boxShadow": "none",
-  "month.moreView.paddingBottom": "0",
-  "month.moreView.border": "1px solid #9a935a",
-  "month.moreView.backgroundColor": "#f9f3c6",
-  "month.moreViewTitle.height": "28px",
-  "month.moreViewTitle.marginBottom": "0",
-  "month.moreViewTitle.backgroundColor": "#f4f4f4",
-  "month.moreViewTitle.borderBottom": "1px solid #ddd",
-  "month.moreViewTitle.padding": "0 10px",
-  "month.moreViewList.padding": "10px",
-};
+import { MONTHLY_CUSTOM_THEME, templates } from "./CalendarConfig";
 
 function reducer(state, action) {
   switch (action.type) {
@@ -59,12 +21,12 @@ function reducer(state, action) {
 }
 
 export default function TaskCalendar(props) {
-  const [{ pending, finished }, Task_Dispatch] = useContext(TasksContext);
+  const [{ pending }, Task_Dispatch] = useContext(TasksContext);
   const [state, dispatch] = useReducer(reducer, {
     tasks: pending.map((task, index) => {
       let newObject = {
         ...task,
-        id: index.toString(),
+        id: task.taskID,
         calendarId: "0",
         title: task.taskName,
         category: "time",
@@ -117,7 +79,12 @@ export default function TaskCalendar(props) {
 
     Task_Dispatch({
       type: ACTIONS.REMOVE_TASK,
-      payload: { task: pending.find((task_) => task_.taskName === e.schedule.title) },
+      payload: {
+        task: state.tasks.find(
+          (task_) =>
+            task_.taskName === e.schedule.title && task_.id === e.schedule.id
+        ),
+      },
     });
 
     calendarInstance.deleteSchedule(
@@ -127,29 +94,90 @@ export default function TaskCalendar(props) {
     );
   };
 
-  const templates = {
-    popupDetailLocation: function (schedule) {
-      return "Location : " + schedule.location;
-    },
-    popupDetailTaskName: function (schedule) {
-      return "Task Name : " + schedule.title;
-    },
-    popupDetailBody: function (schedule) {
-      console.log(schedule);
-      return "Body : " + schedule.description;
-    },
-    popupDetailTime: function (schedule) {
-      return "Time: " + schedule.start.toString();
-    },
-    popupEdit: function () {
-      return "Edit";
-    },
-    popupDelete: function (schedule) {
-      return "Delete";
-    },
-    time(schedule) {
-      return `<a class="ui ${schedule.bgColor} ribbon label"><i class="tag icon"></i>${schedule.title}</a>`;
-    },
+  const handleBeforeUpdateSchedule = (e) => {
+    const calendarInstance = calendarRef.current.getInstance();
+
+    const updatedSchedule = { ...e.schedule, ...e.changes };
+
+    // eslint-disable-next-line array-callback-return
+    const [updatedTask] = state.tasks.filter(
+      (task_) => task_.taskID === parseInt(e.schedule.id)
+    );
+
+    let [
+      hour,
+      min,
+      PMorAM,
+    ] = updatedSchedule.start.toDate().toLocaleTimeString().split(":");
+    let [, pm_am] = PMorAM.split(" ");
+
+    const newTask = {
+      ...updatedTask,
+      taskName: updatedSchedule.title,
+      date: updatedSchedule.start.toDate().toLocaleDateString(),
+      time: `${hour}:${min} ${pm_am}`,
+      location: updatedSchedule.location,
+    };
+
+    console.log(newTask);
+
+    Task_Dispatch({
+      type: ACTIONS.UPDATE,
+      payload: {
+        task: newTask,
+      },
+    });
+
+    calendarInstance.updateSchedule(
+      e.schedule.id,
+      e.schedule.calendarId,
+      e.changes
+    );
+  };
+
+  const handleBeforeCreateSchedule = (e) => {
+    const { location, start, title } = e;
+
+    console.log(e);
+
+    let [hour, min, PMorAM] = start.toDate().toLocaleTimeString().split(":");
+    let [, pm_am] = PMorAM.split(" ");
+
+    const newSchedule = {
+      id: state.tasks.length + 1,
+      title,
+      location,
+      taskName: title,
+      calendarId: "0",
+      date: start.toDate().toLocaleDateString(),
+      time: `${hour}:${min} ${pm_am}`,
+      description: e.state,
+    };
+
+    
+
+    Task_Dispatch({
+      type: ACTIONS.ADD_TASK,
+      payload: {
+        task: {
+          taskName: newSchedule.taskName,
+          date: newSchedule.date,
+          time: newSchedule.time,
+          description: newSchedule.description,
+          location: newSchedule.location,
+        },
+      },
+    });
+
+    const calendarInstance = calendarRef.current.getInstance()
+
+
+    calendarInstance.createSchedules([newSchedule])
+
+    calendarInstance.render(true)
+
+  
+
   };
 
   return (
@@ -182,13 +210,15 @@ export default function TaskCalendar(props) {
         theme={MONTHLY_CUSTOM_THEME}
         schedules={state.tasks}
         scheduleView
-        taskView
         template={templates}
+        useCreationPopup={true}
         useDetailPopup={true}
         disableDblClick={true}
-        disableClick={true}
+        disableClick={false}
         isReadOnly={false}
         onBeforeDeleteSchedule={handleBeforeDeleteSchedule}
+        onBeforeUpdateSchedule={handleBeforeUpdateSchedule}
+        onBeforeCreateSchedule={handleBeforeCreateSchedule}
       ></Calendar>
     </React.Fragment>
   );
