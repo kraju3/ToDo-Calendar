@@ -32,10 +32,27 @@ function reducer(state, action) {
     case ACTIONS.DISPLAY_FORM:
       return {
         toAdd: !state.toAdd,
+        ...state,
       };
     case ACTIONS.CLOSE_FORM:
       return {
         toAdd: !state.toAdd,
+        togglePending: state.togglePending,
+        toggleCompleted: state.toggleCompleted,
+      };
+    case "toggle-pending":
+      console.log(state);
+      return {
+        togglePending: !state.togglePending,
+        toggleCompleted: false,
+        toAdd: state.toAdd,
+      };
+    case "toggle-completed":
+      console.log(state);
+      return {
+        toggleCompleted: !state.toggleCompleted,
+        togglePending: false,
+        toAdd: state.toAdd,
       };
     default:
       return state;
@@ -45,29 +62,21 @@ function reducer(state, action) {
 export default function ToDo(props) {
   const [state, dispatch] = useReducer(reducer, {
     toAdd: false,
+    togglePending: false,
+    toggleCompleted: false,
   });
 
   const [{ pending, finished }, Task_Dispatch] = useContext(TasksContext);
 
   return (
     <React.Fragment>
-      <div className="marginB">
+      <div>
         <h2 className="ui block center aligned icon header">
-          <i className="circular tasks icon"></i>
-          Tasks
-        </h2>
-        <h4 className="ui blocak center aligned icon header">
           Today<i className="calendar outline icon"></i>{" "}
-          {`${new Date().getDate()}/${new Date().getDay()}/${new Date().getFullYear()}`}
-        </h4>
-        {state.toAdd ? (
-          <div className="ui active tiny modal">
-            <div className="content">
-              <ToDoForm dispatch={dispatch} />
-            </div>
-          </div>
-        ) : null}
-
+          {`${
+            new Date().getMonth() + 1
+          }/${new Date().getDay()}/${new Date().getFullYear()}`}
+        </h2>
         <button
           onClick={(e) => {
             e.preventDefault();
@@ -78,6 +87,13 @@ export default function ToDo(props) {
         >
           <i className="plus icon"></i>ToDo
         </button>
+        {state.toAdd ? (
+          <div className="ui active tiny modal">
+            <div className="content">
+              <ToDoForm dispatch={dispatch} />
+            </div>
+          </div>
+        ) : null}
       </div>
       <div className="ui three statistics">
         <div className="yellow statistic">
@@ -93,15 +109,23 @@ export default function ToDo(props) {
           <div className="label">Completed Today</div>
         </div>
       </div>
+
       <br></br>
+
       <div id="ui left small rail">
-        <div className="ui fade reveal">
-          <div className="visible content">
-            <div className="ui yellow ribbon huge label">
-              <i className="tasks icon"></i> Pending
-            </div>
-          </div>
-          <div className="hidden content">
+        <div  onMouseEnter={(e) => {
+            e.preventDefault();
+            dispatch({ type: "toggle-pending" });
+          }}
+          onMouseLeave={(e) => {
+            e.preventDefault();
+            dispatch({ type: "toggle-pending" });
+          }} className="ui segment">
+          <button className="ui yellow ribbon huge label">
+            <i className="tasks icon"></i> Pending
+          </button>
+
+          {state.togglePending ? (
             <div className="ui segment">
               <br></br>
               <div className="ui divided items">
@@ -116,18 +140,29 @@ export default function ToDo(props) {
                 })}
               </div>
             </div>
-          </div>
+          ) : (
+            ""
+          )}
         </div>
       </div>
 
       <div id="ui right small rail">
-        <div className="ui fade reveal">
-          <div className="visible content">
-            <div className="ui center aligned green ribbon huge label">
-              <i className="tasks icon"></i> Completed
-            </div>
-          </div>
-          <div className="hidden content">
+        <div
+          onMouseEnter={(e) => {
+            e.preventDefault();
+            dispatch({ type: "toggle-completed" });
+          }}
+          onMouseLeave={(e) => {
+            e.preventDefault();
+            dispatch({ type: "toggle-completed" });
+          }}
+          className="ui segment"
+        >
+          <button className="ui green ribbon huge label">
+            <i className="tasks icon"></i> Completed
+          </button>
+
+          {state.toggleCompleted ? (
             <div className="ui segment">
               <br></br>
               <div className="ui divided items">
@@ -142,7 +177,9 @@ export default function ToDo(props) {
                 })}
               </div>
             </div>
-          </div>
+          ) : (
+            ""
+          )}
         </div>
       </div>
     </React.Fragment>
