@@ -131,7 +131,7 @@ function reducer(tasks, action) {
       const updatedTask = action.payload.task;
       console.log(updatedTask);
       return {
-        pending: UpdateTask(tasks.pending, updatedTask),
+        pending: sortTasks(UpdateTask(tasks.pending, updatedTask)),
         finished:tasks.finished
       };
 

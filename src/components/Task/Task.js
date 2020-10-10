@@ -9,10 +9,33 @@ function isFinished(tasks, task) {
   );
 }
 
+
+function checkZone(zone1,zone2){
+  return zone1 === zone2 
+}
+
+function checkTime(task,now){
+  return parseInt(task.taskHr) < parseInt(now.hr) && parseInt(task.taskMin) < parseInt(now.min) && parseInt(task.taskSec) < parseInt(now.sec)
+}
+
+function IsExpired(task){
+  const [taskHr,taskMin,timeZone] = new Date(`${task.date} ${task.time}`).toLocaleTimeString().split(':')
+  const [taskSec,taskIsAM] = timeZone.split(" ")
+
+
+  const [hr,min,nowZone] = new Date().toLocaleTimeString().split(':')
+  const [sec,nowIsAM] = nowZone.split(" ")
+
+  return checkZone(taskIsAM,nowIsAM)? (checkTime({taskHr,taskMin,taskSec},{hr,min,sec})):false
+
+}
+
+
 export default function Task(props) {
   const [{ finished }] = useContext(TasksContext);
 
   const isDone = isFinished(finished, props.task);
+  const isExpired = IsExpired(props.task);
 
   const finishTask = (e) => {
     e.preventDefault();
@@ -33,10 +56,10 @@ export default function Task(props) {
   return (
     <div className="item">
       <div className="content">
-        <span className={`ui ${isDone ? "green" : "yellow"}  tag label`}>
-          {isDone ? "Finished" : "Upcoming"}
+        <span className={`ui ${isExpired? 'red':(isDone ? "green" : "yellow")}  tag label`}>
+          {isExpired? 'Expired':(isDone ? "Finished" : "Upcoming")}
         </span>
-        <div className="ui big red label">{props.task.taskName}</div>
+        <div className={`ui big ${props.task.description==='Work'? 'red':'orange'} label`}>{props.task.taskName}</div>
         <div className="ui big label">
           <i className="location arrow icon"></i>
           {props.task.location}
