@@ -5,8 +5,8 @@ import "../../../node_modules/tui-calendar/dist/tui-calendar.css";
 import "../../../node_modules/tui-date-picker/dist/tui-date-picker.css";
 import "../../../node_modules/tui-time-picker/dist/tui-time-picker.css";
 import { TasksContext } from "../../context/TaskContextProvider";
-import { ACTIONS } from "../ToDo/ToDo";
 import { MONTHLY_CUSTOM_THEME, templates } from "./CalendarConfig";
+import {ACTIONS, mapTaskToSchedule} from '../../helpers/TaskHelpers'
 
 function reducer(state, action) {
   switch (action.type) {
@@ -23,23 +23,6 @@ function reducer(state, action) {
     default:
       return state;
   }
-}
-
-function mapTaskToSchedule(tasks) {
-  return tasks.map((task, index) => {
-    let newObject = {
-      ...task,
-      id: task.taskID,
-      calendarId: "0",
-      title: task.taskName,
-      category: "time",
-      dueDateClass: "",
-      bgColor: task.description === "Work" ? "red" : "orange",
-      start: new Date(task.date + ` ${task.time}`),
-      isReadOnly: false,
-    };
-    return newObject;
-  });
 }
 
 export default function TaskCalendar(props) {

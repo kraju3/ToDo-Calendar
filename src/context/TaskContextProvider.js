@@ -1,5 +1,5 @@
 import React, { createContext, useReducer } from "react";
-import { ACTIONS } from "../components/ToDo/ToDo";
+import { ACTIONS, UpdateTask , sortTasks } from ".././helpers/TaskHelpers"
 
 export const TasksContext = createContext({});
 
@@ -78,25 +78,7 @@ const Tasks = [
   },
 ];
 
-function UpdateTask(pending, updatedTask) {
-  return pending.map((task) => {
-    return task.taskID === updatedTask.taskID
-      ? Object.assign({},task,{
-          taskName: updatedTask.taskName,
-          description: updatedTask.description,
-          date: updatedTask.date,
-          time: updatedTask.time,
-          location: updatedTask.location
-        })
-      : task;
-  });
-}
 
-function sortTasks(tasks) {
-  return tasks.sort((a, b) => {
-    return new Date(`${a.date} ${a.time}`) - new Date(`${b.date} ${b.time}`);
-  });
-}
 
 function reducer(tasks, action) {
   switch (action.type) {

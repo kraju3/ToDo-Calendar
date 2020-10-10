@@ -35,6 +35,8 @@ export const MONTHLY_CUSTOM_THEME = {
   "month.moreViewList.padding": "10px",
 };
 
+
+
 export const templates = {
   titlePlaceholder: function () {
     return "Subject";

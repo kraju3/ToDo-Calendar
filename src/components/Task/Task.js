@@ -1,32 +1,7 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useContext } from "react";
-import { ACTIONS } from "../ToDo/ToDo";
 import { TasksContext } from "../../context/TaskContextProvider";
-
-function isFinished(tasks, task) {
-  return tasks.find(
-    (task_) => task_.taskID === task.taskID && task_.taskName === task.taskName
-  );
-}
-
-function checkTime(task, now) {
-  console.log(task);
-  console.log(now);
-  return (
-    parseInt(task.taskHr) <= parseInt(now.hr) &&
-    parseInt(task.taskMin) <= parseInt(now.min)
-  );
-}
-
-function IsExpired(task) {
-  const [taskHr, taskMin] = new Date(`${task.date} ${task.time}`)
-    .toTimeString()
-    .split(":");
-
-  const [hr, min] = new Date().toTimeString().split(":");
-
-  return checkTime({ taskHr, taskMin }, { hr, min });
-}
+import { ACTIONS,isFinished, IsExpired } from "../../helpers/TaskHelpers";
 
 export default function Task(props) {
   const [{ finished }] = useContext(TasksContext);

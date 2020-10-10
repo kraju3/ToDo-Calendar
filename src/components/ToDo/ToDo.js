@@ -1,38 +1,21 @@
 import React, { useContext, useReducer } from "react";
 import { TasksContext } from "../../context/TaskContextProvider";
 import Task from "../Task/Task";
+import TaskStatistic from "../Task/TaskStatistic";
 import "./ToDo.css";
+import ToDoButton from "./ToDoButton";
+import Today from "./Today";
 import ToDoForm from "./ToDoForm";
 
-export const ACTIONS = {
-  ADD_TASK: "add-task",
-  REMOVE_TASK: "remove-task",
-  COMPLETE_TASK: "complete-task",
-  DISPLAY_FORM: "display-form",
-  CLOSE_FORM: "close-form",
-  UPDATE: "sync",
-};
-
-function checkToday(task) {
-  return (
-    new Date(task.date).toLocaleDateString() === new Date().toLocaleDateString()
-  );
-}
-
-function sortByToday(pending) {
-  const todaysTasks = pending.filter((task) => checkToday(task) === true);
-
-  console.log(todaysTasks);
-
-  return todaysTasks;
-}
+import { ACTIONS, sortByToday } from "../../helpers/TaskHelpers";
 
 function reducer(state, action) {
   switch (action.type) {
     case ACTIONS.DISPLAY_FORM:
       return {
         toAdd: !state.toAdd,
-        ...state,
+        togglePending: state.togglePending,
+        toggleCompleted: state.toggleCompleted,
       };
     case ACTIONS.CLOSE_FORM:
       return {
@@ -71,22 +54,8 @@ export default function ToDo(props) {
   return (
     <React.Fragment>
       <div>
-        <h2 className="ui block center aligned icon header">
-          Today<i className="calendar outline icon"></i>{" "}
-          {`${
-            new Date().getMonth() + 1
-          }/${new Date().getDay()}/${new Date().getFullYear()}`}
-        </h2>
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            dispatch({ type: ACTIONS.DISPLAY_FORM });
-          }}
-          className=" circular ui negative button"
-          type="submit"
-        >
-          <i className="plus icon"></i>ToDo
-        </button>
+        <Today />
+        <ToDoButton dispatch={dispatch} />
         {state.toAdd ? (
           <div className="ui active tiny modal">
             <div className="content">
@@ -95,32 +64,21 @@ export default function ToDo(props) {
           </div>
         ) : null}
       </div>
-      <div className="ui three statistics">
-        <div className="yellow statistic">
-          <div className="value">{pending.length}</div>
-          <div className="label">Pending Total</div>
-        </div>
-        <div className="red statistic">
-          <div className="value">{sortByToday(pending).length}</div>
-          <div className="label">Pending Today</div>
-        </div>
-        <div className="green statistic">
-          <div className="value">{finished.length}</div>
-          <div className="label">Completed Today</div>
-        </div>
-      </div>
-
+      <TaskStatistic finished={finished} pending={pending} />
       <br></br>
 
       <div id="ui left small rail">
-        <div  onMouseEnter={(e) => {
+        <div
+          onMouseEnter={(e) => {
             e.preventDefault();
             dispatch({ type: "toggle-pending" });
           }}
           onMouseLeave={(e) => {
             e.preventDefault();
             dispatch({ type: "toggle-pending" });
-          }} className="ui segment">
+          }}
+          className="ui segment"
+        >
           <button className="ui yellow ribbon huge label">
             <i className="tasks icon"></i> Pending
           </button>
